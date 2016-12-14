@@ -889,7 +889,7 @@ def validate_response(val, typ):
         raise_validation_error(ErrInvalidResponse, val, p)
     if data:
         try:
-            response_json = json.loads(str(data, 'utf8'))
+            response_json = json_loads(data)
         except ValueError:
             raise_validation_error(ErrInvalidResponse, val, p)
     else:
