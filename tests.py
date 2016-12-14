@@ -52,8 +52,7 @@ class TestParser(unittest.TestCase):
                      'name': ((m.T_STRING, None), False),
                      'number': (m.T_I16, False),
                      'children': ([({'id': (m.T_I32, False)}, False),
-                                   m.S_ELLIPSIS], False)
-                 }},
+                                   m.S_ELLIPSIS], False)}},
                 {'status_code': ['4XX', '5XX'],
                  'schema': {'message': ((m.T_STRING, None), False)}}
             ]
@@ -209,7 +208,7 @@ class TestValidation(unittest.TestCase):
     def test_validate_u16(self):
         assert m.validate_u16(65535, None) is None
         with self.assertRaises(m.ValidationError) as exc:
-            m.validate_u16(65535*2, None)
+            m.validate_u16(65535 * 2, None)
         assert exc.exception.code == m.ErrInvalidU16[0]
 
     def test_validate_u32(self):
@@ -435,6 +434,13 @@ class TestValidation(unittest.TestCase):
         assert m.validate_response(('', 201), [{'status_code': [201],
                                                 'schema': None}]) is \
             None
+
+    def test_json_loads(self):
+        val = '{"hello": "world"}'
+        val_unicode = '{"中": "文"}'
+        a = {u"中": u"文"}
+        assert m.json_loads(val) == {"hello": "world"}
+        assert m.json_loads(val_unicode) == a
 
 
 if __name__ == '__main__':
