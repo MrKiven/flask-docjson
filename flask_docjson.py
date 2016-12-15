@@ -571,6 +571,43 @@ def p_string_type(p):
         p[0] = (T_STRING, p[3])
 
 
+def doc(_doc):
+    """Doc decorator to appending to func, Convenient management api documents.
+
+    Example:
+
+        get_item_schema='''
+        Schema::
+
+            GET /item/<i32:id>
+
+            200
+            {
+                "id": i32,
+                "name": string(10),
+                "number": i8
+            }
+            4XX/5XX
+            {"message": string}
+        '''
+
+        @app.route('/item/<int:id>', methods=['GET'])
+        @doc(get_item_schema)
+        def get_item(id):
+            return jsonify(id=id, name='hello', 'number'=123)
+    """
+    def _(func):
+        old, new = func.__doc__, _doc
+        if old is not None:
+            last = old.splitlines()[-1]
+            if not last or not last.isspace():
+                new = ''.join(('\n', new))
+            new = "".join((old, new))
+        setattr(func, '__doc__', new)
+        return func
+    return _
+
+
 def parse_schema(data):
     """Parse schema string to schema dict.
     """

@@ -5,6 +5,34 @@ import flask_docjson as m
 from flask import Response
 
 
+test_api_doc = """
+Schema::
+
+ POST/PUT /item
+ {
+     "name": string,
+     "number": i16,  // a simple number
+     "children": [
+         {"id": i32},
+         ...
+     ]
+ }
+
+ 200
+ {
+     "id": i32,
+     "name": string,
+     "number": i16
+     "children": [
+         {"id": i32},
+         ...
+     ]
+ }
+ 4XX/5XX
+ {"message": string}
+"""
+
+
 class TestParser(unittest.TestCase):
 
     def test_simple(self):
@@ -34,6 +62,35 @@ class TestParser(unittest.TestCase):
             {"message": string}
         """
         schema = m.parse(self.test_simple.__doc__)
+        assert schema == {
+            'request': {
+                'route': ['/item', {}],
+                'methods': [m.M_POST, m.M_PUT],
+                'schema': {
+                    'name': ((m.T_STRING, None), False),
+                    'number': (m.T_I16, False),
+                    'children': ([({'id': (m.T_I32, False)}, False),
+                                  m.S_ELLIPSIS], False)
+                },
+            },
+            'responses': [
+                {'status_code': [200],
+                 'schema': {
+                     'id': (m.T_I32, False),
+                     'name': ((m.T_STRING, None), False),
+                     'number': (m.T_I16, False),
+                     'children': ([({'id': (m.T_I32, False)}, False),
+                                   m.S_ELLIPSIS], False)
+                 }},
+                {'status_code': ['4XX', '5XX'],
+                 'schema': {'message': ((m.T_STRING, None), False)}}
+            ]
+        }
+
+    @m.doc(test_api_doc)
+    def test_doc_decorator(self):
+        """Test api doc"""
+        schema = m.parse(self.test_doc_decorator.__doc__)
         assert schema == {
             'request': {
                 'route': ['/item', {}],
